@@ -1,0 +1,13 @@
+# Ignore build files
+build/
+
+# Mac system files
+.DS_Store
+
+# VS Code settings
+.vscode/
+
+# Compiled files
+*.o
+*.out
+*.exe
