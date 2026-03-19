@@ -12,7 +12,9 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(ModernAsteroids src/main.cpp)
+file(GLOB SRC_FILES src/*.cpp)
+add_executable(ModernAsteroids ${SRC_FILES})
+target_include_directories(ModernAsteroids PRIVATE include)
 target_compile_features(ModernAsteroids PRIVATE cxx_std_17)
 target_link_libraries(ModernAsteroids PRIVATE SFML::Graphics)
 
