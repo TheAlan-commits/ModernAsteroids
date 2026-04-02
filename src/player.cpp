@@ -7,7 +7,7 @@ obtaining the png from the assests folder.
 #include "player.hpp"
 #include<iostream>
 
-Player::Player() : texture(), sprite(texture), speed(1.f)
+Player::Player() : texture(), sprite(texture), speed(350.f)
 {
     if (!texture.loadFromFile("../../../../assets/sprites/sprite.png"))
     {
@@ -31,75 +31,62 @@ Player::Player() : texture(), sprite(texture), speed(1.f)
     float centerX = bounds.getCenter().x;
     float centerY = bounds.getCenter().y;
     sprite.setOrigin({ centerX, centerY });
+
+    
+
+
     
 }
 
 // Detect keystrokes and assign movement to said keys
-void Player::update()
+void Player::update(float deltaTime, const sf::Vector2i mousePosition)
 {
-    //Get the current size of the window and sprite position
-    sf::Vector2u windowSize = sf::VideoMode::getDesktopMode().size;
+    //Get the current sprite position
     sf::Vector2f spritePosition = sprite.getPosition();
-    
+
+    //Use mouse and sprite postition to calculate and set angle between sprite and mouse
+    float dx = mousePosition.x - spritePosition.x;
+    float dy = mousePosition.y - spritePosition.y;
+    sf::Angle angle = sf::degrees(atan2(dy, dx) * 180.0f / 3.14159f);
+
+    sprite.setRotation(angle + sf::degrees(90));
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
     {
-        if (spritePosition.y - speed > 0)
+        if (spritePosition.y - speed * deltaTime > 0)
         {
             // Sprite moves upward
             std::cout << "W pressed\n"; // debugging cout statement
-            sprite.move({ 0.f, -speed });
+            sprite.move({ 0.f, -speed * deltaTime});
         }
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
     {
-        if (spritePosition.y + speed < 800)
+        if (spritePosition.y + speed * deltaTime < 800)
         {
             // Sprite moves Downward
-            sprite.move({ 0.f, speed });
+            sprite.move({ 0.f, speed * deltaTime });
         }
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
     {
-        if (spritePosition.x - speed > 0)
+        if (spritePosition.x - speed * deltaTime > 0)
         {
             // Sprite moves leftward, actually it just moves left ;)
-            sprite.move({ -speed, 0.f });
+            sprite.move({ -speed * deltaTime, 0.f });
         }
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
     {
-        if (spritePosition.x + speed < 800)
+        if (spritePosition.x + speed * deltaTime < 800)
         {
             // Sprite moves right
-            sprite.move({ speed, 0.f });
+            sprite.move({speed * deltaTime, 0.f });
         }
     }
-
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-    {
-        sprite.setRotation(sf::degrees(-90));
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
-    {
-        sprite.setRotation(sf::degrees(0));
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-    {
-        sprite.setRotation(sf::degrees(90));
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
-    {
-        sprite.setRotation(sf::degrees(180));
-    }
-
 }
 
 // Following code draws the player every frame
