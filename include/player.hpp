@@ -13,7 +13,7 @@ class Player
 {
     public:
         Player();
-        void update();
+        void update(float deltaTime, const sf::Vector2i mousePosition);
         void draw(sf::RenderWindow& window);
 
     private:

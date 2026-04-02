@@ -7,9 +7,9 @@ obtaining the png from the assests folder.
 #include "player.hpp"
 #include<iostream>
 
-Player::Player() : texture(), sprite(texture), speed(.5f)
+Player::Player() : texture(), sprite(texture), speed(350.f)
 {
-    if (!texture.loadFromFile("../assets/sprites/sprite.png"))
+    if (!texture.loadFromFile("../../../../assets/sprites/sprite.png"))
     {
         std::cout << "Failed to load player texture\n"; // troubleshooting cout, has no actual importance to code
     }
@@ -25,41 +25,73 @@ Player::Player() : texture(), sprite(texture), speed(.5f)
     sprite.setTexture(texture, true);
     sprite.setPosition({100.f, 100.f});
     sprite.setScale({1.f, 1.f});
+
+    //Get the local bounds of the sprite and define the origin as the center of those bounds
+    sf::FloatRect bounds = sprite.getLocalBounds();
+    float centerX = bounds.getCenter().x;
+    float centerY = bounds.getCenter().y;
+    sprite.setOrigin({ centerX, centerY });
+
+    
+
+
+    
 }
 
 // Detect keystrokes and assign movement to said keys
-void Player::update()
+void Player::update(float deltaTime, const sf::Vector2i mousePosition)
 {
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+    //Get the current sprite position
+    sf::Vector2f spritePosition = sprite.getPosition();
+
+    //Use mouse and sprite postition to calculate and set angle between sprite and mouse
+    float dx = mousePosition.x - spritePosition.x;
+    float dy = mousePosition.y - spritePosition.y;
+    sf::Angle angle = sf::degrees(atan2(dy, dx) * 180.0f / 3.14159f);
+
+    sprite.setRotation(angle + sf::degrees(90));
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
     {
-        // Sprite moves upward
-        std::cout << "W pressed\n"; // debugging cout statement
-        sprite.move({0.f, -speed});
+        if (spritePosition.y - speed * deltaTime > 0)
+        {
+            // Sprite moves upward
+            std::cout << "W pressed\n"; // debugging cout statement
+            sprite.move({ 0.f, -speed * deltaTime});
+        }
     }
 
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
     {
-        // Sprite moves Downward
-        sprite.move({0.f, speed});
+        if (spritePosition.y + speed * deltaTime < 800)
+        {
+            // Sprite moves Downward
+            sprite.move({ 0.f, speed * deltaTime });
+        }
     }
 
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
     {
-
-        // Sprite moves leftward, actually it just moves left ;)
-        sprite.move({-speed, 0.f});
+        if (spritePosition.x - speed * deltaTime > 0)
+        {
+            // Sprite moves leftward, actually it just moves left ;)
+            sprite.move({ -speed * deltaTime, 0.f });
+        }
     }
-    
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
     {
-        // Sprite moves right
-        sprite.move({speed, 0.f});
+        if (spritePosition.x + speed * deltaTime < 800)
+        {
+            // Sprite moves right
+            sprite.move({speed * deltaTime, 0.f });
+        }
     }
 }
 
 // Following code draws the player every frame
 void Player::draw(sf::RenderWindow& window)
 {
-    std::cout << "Drawing player\n"; // debugging cout statement
+    //std::cout << "Drawing player\n"; // debugging cout statement
     window.draw(sprite);
 }
