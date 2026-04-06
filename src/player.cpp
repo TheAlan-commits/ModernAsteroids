@@ -6,10 +6,11 @@ obtaining the png from the assests folder.
 
 #include "player.hpp"
 #include<iostream>
+#include<filesystem>
 
 Player::Player() : texture(), sprite(texture), speed(350.f)
 {
-    if (!texture.loadFromFile("../../../../assets/sprites/sprite.png"))
+    if (!texture.loadFromFile("assets/sprites/sprite.png"))
     {
         std::cout << "Failed to load player texture\n"; // troubleshooting cout, has no actual importance to code
     }
@@ -30,12 +31,7 @@ Player::Player() : texture(), sprite(texture), speed(350.f)
     sf::FloatRect bounds = sprite.getLocalBounds();
     float centerX = bounds.getCenter().x;
     float centerY = bounds.getCenter().y;
-    sprite.setOrigin({ centerX, centerY });
-
-    
-
-
-    
+    sprite.setOrigin({ centerX, centerY });   
 }
 
 // Detect keystrokes and assign movement to said keys
@@ -56,7 +52,7 @@ void Player::update(float deltaTime, const sf::Vector2i mousePosition)
         if (spritePosition.y - speed * deltaTime > 0)
         {
             // Sprite moves upward
-            std::cout << "W pressed\n"; // debugging cout statement
+            // std::cout << "W pressed\n"; // debugging cout statement
             sprite.move({ 0.f, -speed * deltaTime});
         }
     }

@@ -14,8 +14,14 @@ FetchContent_MakeAvailable(SFML)
 
 file(GLOB SRC_FILES src/*.cpp)
 add_executable(ModernAsteroids ${SRC_FILES})
+
 target_include_directories(ModernAsteroids PRIVATE include)
 target_compile_features(ModernAsteroids PRIVATE cxx_std_17)
 target_link_libraries(ModernAsteroids PRIVATE SFML::Graphics)
+
+add_custom_command(TARGET ModernAsteroids POST_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    ${CMAKE_BINARY_DIR}/assets)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ModernAsteroids)
