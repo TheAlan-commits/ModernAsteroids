@@ -25,7 +25,7 @@ Player::Player() : texture(), sprite(texture), speed(350.f)
     // Set the png to always be connected to the sprite and position it in the window
     sprite.setTexture(texture, true);
     sprite.setPosition({100.f, 100.f});
-    sprite.setScale({1.f, 1.f});
+    sprite.setScale({.35f, .35f});
 
     //Get the local bounds of the sprite and define the origin as the center of those bounds
     sf::FloatRect bounds = sprite.getLocalBounds();
