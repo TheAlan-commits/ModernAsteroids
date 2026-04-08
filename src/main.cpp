@@ -29,6 +29,25 @@ int main()
 	// Seed random generator
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
 
+	// Load background texture
+	sf::Texture backgroundTexture;
+	if (!backgroundTexture.loadFromFile("assets/sprites/Purple_Nebula.png"))
+	{
+		std::cout << "Failed to load assets/sprites/Purple_Nebula.png\n";
+		return 1;
+	}
+
+	sf::Sprite backgroundSprite(backgroundTexture);
+
+	// Scale background to fit the window
+	sf::Vector2u textureSize = backgroundTexture.getSize();
+	sf::Vector2u windowSize = window.getSize();
+
+	backgroundSprite.setScale({
+		static_cast<float>(windowSize.x) / textureSize.x,
+		static_cast<float>(windowSize.y) / textureSize.y
+	});
+
 	// Load asteroid textures
 	std::vector<sf::Texture> asteroidTextures;
 
@@ -44,11 +63,10 @@ int main()
 		else
 		{
 			std::cout << "Loaded " << path << '\n';
-			asteroidTextures.push_back(texture);
+			asteroidTextures.push_back(std::move(texture));
 		}
 	}
 
-	// Load astroid67.png
 	sf::Texture extraTexture;
 	if (!extraTexture.loadFromFile("assets/sprites/astroid67.png"))
 	{
@@ -57,10 +75,9 @@ int main()
 	else
 	{
 		std::cout << "Loaded assets/sprites/astroid67.png\n";
-		asteroidTextures.push_back(extraTexture);
+		asteroidTextures.push_back(std::move(extraTexture));
 	}
 
-	// Make sure at least one texture loaded
 	if (asteroidTextures.empty())
 	{
 		std::cout << "No asteroid textures were loaded. Exiting program.\n";
@@ -123,17 +140,20 @@ int main()
 		}
 
 		// Draw everything
-		window.clear(sf::Color::Black);
+		window.clear();
 
+		// Draw background first
+		window.draw(backgroundSprite);
+
+		// Draw asteroids
 		for (const Asteroid& asteroid : asteroids)
 		{
 			asteroid.draw(window);
 		}
 
+		// Draw player
 		player.draw(window);
 
 		window.display();
 	}
-
-	return 0;
 }
