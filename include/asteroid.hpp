@@ -15,4 +15,5 @@ public:
     void draw(sf::RenderWindow& window) const;
 
     sf::Vector2f getPosition() const;
+    sf::FloatRect getBounds() const;
 };
