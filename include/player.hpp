@@ -14,6 +14,7 @@ class Player
     public:
         Player();
         void update(float deltaTime, const sf::Vector2i mousePosition);
+        sf::FloatRect getBounds() const;
         void draw(sf::RenderWindow& window);
 
     private:
