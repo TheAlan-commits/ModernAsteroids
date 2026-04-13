@@ -9,14 +9,7 @@ obtaining the png from the assests folder.
 
 Player::Player() : texture(), sprite(texture), speed(350.f)
 {
-    std::string basePath = "assets/";
-
-    if (!std::filesystem::exists(basePath))
-    {
-        basePath = "../assets/";
-    }
-
-    if (!texture.loadFromFile(basePath + "sprites/sprite.png"))
+    if (!texture.loadFromFile("assets/sprites/sprite.png") && !texture.loadFromFile("../../../../assets/sprites/sprite.png"))
     {
         std::cout << "Failed to load player texture\n";
     }
