@@ -103,7 +103,7 @@ cmake --build .
 After building successfully:
 
 ```bash
-./bin/main
+./bin/ModernAsteroids
 ```
 
 This will open the initial SFML window used to confirm that the development environment is working correctly.

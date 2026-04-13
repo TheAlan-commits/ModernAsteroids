@@ -15,6 +15,20 @@ Asteroid::Asteroid(const sf::Texture& texture, sf::Vector2f position, sf::Vector
      sprite.setScale({7.f, 7.f});
 }
 
+// Asteroid Hitbox
+sf::FloatRect Asteroid::getBounds() const
+{
+    sf::Vector2f pos = sprite.getPosition();
+
+    float hitboxWidth = 80.f;
+    float hitboxHeight = 80.f;
+
+    return sf::FloatRect(
+        {pos.x - hitboxWidth / 2.f, pos.y - hitboxHeight / 2.f},
+        {hitboxWidth, hitboxHeight}
+    );
+}
+
 void Asteroid::update(float delta, const sf::RenderWindow& window)
 {
     sprite.move(velocity * delta);
