@@ -33,14 +33,14 @@ int main()
 	sf::Texture backgroundTexture;
 	std::string platform = "";
 
-	if (backgroundTexture.loadFromFile("assets/sprites/Purple_Nebula.png"))
+	if (backgroundTexture.loadFromFile("assets/sprites/Space_Background.png"))
 	{
 		platform = "Mac";
 	}
 	else
 	{
 		platform = "Windows";
-		backgroundTexture.loadFromFile("../../../../assets/sprites/Purple_Nebula.png");
+		backgroundTexture.loadFromFile("../../../../assets/sprites/Space_Background.png");
 	}
 
 	//if (!backgroundTexture.loadFromFile("assets/sprites/Purple_Nebula.png") && !backgroundTexture.loadFromFile("../../../../assets/sprites/Purple_Nebula.png"))
