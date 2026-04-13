@@ -10,6 +10,13 @@
 
 int main()
 {
+	std::string basePath = "assets/";
+
+	if (!std::filesystem::exists(basePath))
+	{
+		basePath = "../assets/";
+	}
+
 	// Get current desktop mode
 	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 
@@ -31,23 +38,11 @@ int main()
 
 	// Load background texture
 	sf::Texture backgroundTexture;
-	std::string platform = "";
-
-	if (backgroundTexture.loadFromFile("assets/sprites/Purple_Nebula.png"))
+	if (!backgroundTexture.loadFromFile(basePath + "sprites/Space_Background.png"))
 	{
-		platform = "Mac";
+		std::cout << "Failed to load " << basePath + "sprites/Space_Background.png" << '\n';
+		return 1;
 	}
-	else
-	{
-		platform = "Windows";
-		backgroundTexture.loadFromFile("../../../../assets/sprites/Purple_Nebula.png");
-	}
-
-	//if (!backgroundTexture.loadFromFile("assets/sprites/Purple_Nebula.png") && !backgroundTexture.loadFromFile("../../../../assets/sprites/Purple_Nebula.png"))
-	//{
-	//	std::cout << "Failed to load assets/sprites/Purple_Nebula.png\n";
-	//	return 1;
-	//}
 
 	sf::Sprite backgroundSprite(backgroundTexture);
 
@@ -66,13 +61,7 @@ int main()
 	for (int i = 1; i <= 9; i++)
 	{
 		sf::Texture texture;
-		std::string path = "../../../../assets/sprites/astroid" + std::to_string(i) + ".png";
-
-		if (platform == "Mac")
-		{
-			std::string path = "assets/sprites/astroid" + std::to_string(i) + ".png";
-		}
-
+		std::string path = basePath + "sprites/astroid" + std::to_string(i) + ".png";
 
 		if (!texture.loadFromFile(path))
 		{
@@ -86,7 +75,7 @@ int main()
 	}
 
 	sf::Texture extraTexture;
-	if (!extraTexture.loadFromFile("assets/sprites/astroid67.png") && !extraTexture.loadFromFile("../../../../assets/sprites/astroid67.png"))
+	if (!extraTexture.loadFromFile(basePath + "sprites/astroid67.png"))
 	{
 		std::cout << "Failed to load assets/sprites/astroid67.png\n";
 	}
