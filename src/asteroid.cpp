@@ -55,7 +55,32 @@ void Asteroid::draw(sf::RenderWindow& window) const
     window.draw(sprite);
 }
 
+void Asteroid::deactivate()
+{
+    active = false;
+}
+
 sf::Vector2f Asteroid::getPosition() const
 {
     return sprite.getPosition();
+}
+
+void Asteroid::reset()
+{
+    sprite.setPosition({ static_cast<float>(std::rand() % 800), static_cast<float>(std::rand() % 800) });
+    //int x_or_y = std::rand() % 2;
+    //int b_or_f = std::rand() % 2;
+
+    //if (b_or_f)
+    //{
+    //    float resetPosition = 0.f;
+    //}
+    //else
+    //{
+    //    float resetPostion = static_cast<float>(800)
+    //}
+    //if (x_or_y)
+    //{
+    //    sprite.setPosition({ sprite.getPosition().y });
+    //}
 }

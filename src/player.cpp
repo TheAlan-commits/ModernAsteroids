@@ -100,3 +100,13 @@ sf::FloatRect Player::getBounds() const
         {hitboxWidth, hitboxHeight}
     );
 }
+
+sf::Angle Player::getAngle() const
+{
+    return sprite.getRotation();
+}
+
+sf::Vector2f Player::getPosition()
+{
+    return sprite.getPosition();
+}

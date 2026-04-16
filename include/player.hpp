@@ -16,6 +16,8 @@ class Player
         void update(float deltaTime, const sf::Vector2i mousePosition);
         sf::FloatRect getBounds() const;
         void draw(sf::RenderWindow& window);
+        sf::Angle getAngle() const;
+        sf::Vector2f getPosition();
 
     private:
         sf::Texture texture;

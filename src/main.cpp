@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include "player.hpp"
 #include "asteroid.hpp"
+#include "bullet.hpp"
+#include <cmath>
 #include <optional>
 #include <iostream>
 #include <vector>
@@ -9,8 +11,25 @@
 #include <ctime>
 #include <filesystem>
 
+void shoot(sf::Vector2f playerPosition, sf::Angle playerRotation, sf::Texture& bulletTexture, std::vector<Bullet>& bullets)
+{
+	// Convert angle to direction
+	float radians = (playerRotation - sf::degrees(90)).asRadians();
+	float dx = std::cos(radians);
+	float dy = std::sin(radians);
+
+	float bulletSpeed = 500.f;
+
+	Bullet newBullet(bulletTexture, playerPosition, bulletSpeed);
+	newBullet.setVelocity(sf::Vector2f(dx * bulletSpeed, dy * bulletSpeed));
+	newBullet.setRotation(playerRotation);
+
+	bullets.push_back(newBullet);
+}
+
 int main()
 {
+	int score = 0;
 	// Determine asset base path
 	std::string basePath = "assets/";
 
@@ -24,7 +43,7 @@ int main()
 
 	// Create window
 	sf::RenderWindow window(
-		sf::VideoMode({800, 800}, desktop.bitsPerPixel),
+		sf::VideoMode({ 800, 800 }, desktop.bitsPerPixel),
 		"Modern Asteroids",
 		sf::Style::Default,
 		sf::State::Windowed
@@ -58,13 +77,13 @@ int main()
 	float startY = 4.f;
 	float spacing = 45.f;
 
-	heart1.setScale({heartScale, heartScale});
-	heart2.setScale({heartScale, heartScale});
-	heart3.setScale({heartScale, heartScale});
+	heart1.setScale({ heartScale, heartScale });
+	heart2.setScale({ heartScale, heartScale });
+	heart3.setScale({ heartScale, heartScale });
 
-	heart1.setPosition({startX, startY});
-	heart2.setPosition({startX + spacing, startY});
-	heart3.setPosition({startX + spacing * 2.f, startY});
+	heart1.setPosition({ startX, startY });
+	heart2.setPosition({ startX + spacing, startY });
+	heart3.setPosition({ startX + spacing * 2.f, startY });
 
 	Player player;
 
@@ -89,7 +108,8 @@ int main()
 	backgroundSprite.setScale({
 		static_cast<float>(windowSize.x) / textureSize.x,
 		static_cast<float>(windowSize.y) / textureSize.y
-	});
+		});
+
 
 	// Asteroids
 	std::vector<sf::Texture> asteroidTextures;
@@ -144,6 +164,17 @@ int main()
 		);
 	}
 
+	//Bullets
+	sf::Texture bulletTexture;
+	if (!bulletTexture.loadFromFile(basePath + "sprites/Bullet_Texture.png"))
+	{
+		std::cout << "Failed to load " << basePath + "sprites/Bullet_Texture.png" << '\n';
+		return 1;
+	}
+
+	std::vector<Bullet> bullets;
+
+
 	// Game loop
 	while (window.isOpen())
 	{
@@ -160,8 +191,49 @@ int main()
 		{
 			player.update(delta, mousePosition);
 
+			//Review how this works Eri
+			static bool wasMousePressed = false;
+			bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+
+			if (isMousePressed && !wasMousePressed) {  // Only shoot on press, not hold
+				shoot(player.getPosition(), player.getAngle(), bulletTexture, bullets);
+			}
+
+			wasMousePressed = isMousePressed;
+
+			for (auto& bullet : bullets) {
+				bullet.update(delta, window);
+			}
+
+
+
 			for (Asteroid& asteroid : asteroids)
 				asteroid.update(delta, window);
+
+			for (auto& bullet : bullets)
+			{
+				if (!bullet.isActive())
+				{
+					continue;
+				}
+
+				for (auto& asteroid : asteroids) {
+					if (!asteroid.isActive())
+					{
+						continue;
+					}
+
+					if (bullet.getBounds().findIntersection(asteroid.getBounds())) {
+						bullet.deactivate();     
+						asteroid.reset();   
+						score += 10;         
+						std::cout << "Score: " << score << '\n';
+
+						std::cout << "Asteroid destroyed!\n";
+						break;  // Bullet can only hit one asteroid
+					}
+				}
+			}
 
 			if (invincibilityTimer > 0.f)
 				invincibilityTimer -= delta;
@@ -173,17 +245,17 @@ int main()
 					if (player.getBounds().findIntersection(asteroid.getBounds()))
 					{
 						std::cout << "Collision detected!\n";
-        				std::cout << "Player: " 
-                  		<< player.getBounds().position.x << ", "
-                  		<< player.getBounds().position.y << " | "
-                  		<< player.getBounds().size.x << " x "
-                  		<< player.getBounds().size.y << '\n';
+						std::cout << "Player: "
+							<< player.getBounds().position.x << ", "
+							<< player.getBounds().position.y << " | "
+							<< player.getBounds().size.x << " x "
+							<< player.getBounds().size.y << '\n';
 
-        				std::cout << "Asteroid: "
-                  		<< asteroid.getBounds().position.x << ", "
-                  		<< asteroid.getBounds().position.y << " | "
-                  		<< asteroid.getBounds().size.x << " x "
-                  		<< asteroid.getBounds().size.y << '\n';
+						std::cout << "Asteroid: "
+							<< asteroid.getBounds().position.x << ", "
+							<< asteroid.getBounds().position.y << " | "
+							<< asteroid.getBounds().size.x << " x "
+							<< asteroid.getBounds().size.y << '\n';
 
 						lives--;
 						invincibilityTimer = invincibilityDuration;
@@ -195,31 +267,48 @@ int main()
 							lives = 0;
 							gameOver = true;
 							std::cout << "Game Over\n";
+							std::cout << "Final Score: " << score << '\n';
 						}
 
 						break;
 					}
 				}
 			}
+
+
+			for (int i = bullets.size() - 1; i >= 0; i--) {
+				if (!bullets[i].isActive()) {
+					bullets.erase(bullets.begin() + i);
+				}
+			}
+
+			for (int i = asteroids.size() - 1; i >= 0; i--) {
+				if (!asteroids[i].isActive()) {
+					asteroids.erase(asteroids.begin() + i);
+				}
+			}
+
+			// DRAW
+			window.clear();
+
+			window.draw(backgroundSprite);
+
+			for (const Asteroid& asteroid : asteroids)
+				asteroid.draw(window);
+
+			for (const Bullet& bullet : bullets) {
+				bullet.draw(window);
+			}
+
+				player.draw(window);
+
+				// Draw hearts
+				if (lives >= 1) window.draw(heart1);
+				if (lives >= 2) window.draw(heart2);
+				if (lives >= 3) window.draw(heart3);
+
+				window.display();
+			}
 		}
-
-		// DRAW
-		window.clear();
-
-		window.draw(backgroundSprite);
-
-		for (const Asteroid& asteroid : asteroids)
-			asteroid.draw(window);
-
-		player.draw(window);
-
-		// Draw hearts
-		if (lives >= 1) window.draw(heart1);
-		if (lives >= 2) window.draw(heart2);
-		if (lives >= 3) window.draw(heart3);
-
-		window.display();
+		return 0;
 	}
-
-	return 0;
-}

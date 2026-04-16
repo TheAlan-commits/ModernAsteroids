@@ -13,7 +13,7 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 file(GLOB SRC_FILES src/*.cpp)
-add_executable(ModernAsteroids ${SRC_FILES})
+add_executable(ModernAsteroids ${SRC_FILES} "src/bullet.cpp")
 
 target_include_directories(ModernAsteroids PRIVATE include)
 target_compile_features(ModernAsteroids PRIVATE cxx_std_17)
