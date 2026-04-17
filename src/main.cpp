@@ -29,7 +29,15 @@ void shoot(sf::Vector2f playerPosition, sf::Angle playerRotation, sf::Texture& b
 
 int main()
 {
+	enum class GameState
+	{
+		MainMenu,
+		Playing,
+		GameOver
+	};
+
 	int score = 0;
+
 	// Determine asset base path
 	std::string basePath = "assets/";
 
@@ -43,21 +51,62 @@ int main()
 
 	// Create window
 	sf::RenderWindow window(
-		sf::VideoMode({ 800, 800 }, desktop.bitsPerPixel),
+		sf::VideoMode({800, 800}, desktop.bitsPerPixel),
 		"Modern Asteroids",
 		sf::Style::Default,
 		sf::State::Windowed
 	);
 
+	GameState currentState = GameState::MainMenu;
+
 	// Player lives
 	int lives = 3;
-	bool gameOver = false;
 
 	// Invincibility timer
 	float invincibilityTimer = 0.f;
 	const float invincibilityDuration = 1.5f;
 
-	// Heart Texture (Fixed path)
+	// Font
+	sf::Font font;
+	if (!font.openFromFile(basePath + "fonts/Orbitron-VariableFont_wght.ttf"))
+	{
+		std::cout << "Failed to load " << basePath + "fonts/Orbitron-VariableFont_wght.ttf" << '\n';
+		return 1;
+	}
+
+	// Main Menu UI
+	sf::Text titleText(font);
+	titleText.setString("MODERN ASTEROIDS");
+	titleText.setCharacterSize(52);
+	titleText.setPosition({110.f, 160.f});
+
+	sf::Text playText(font);w
+	playText.setString("Play");
+	playText.setCharacterSize(34);
+	playText.setPosition({350.f, 340.f});
+
+	sf::Text quitMenuText(font);
+	quitMenuText.setString("Quit");
+	quitMenuText.setCharacterSize(34);
+	quitMenuText.setPosition({355.f, 430.f});
+
+	// Game Over UI
+	sf::Text gameOverText(font);
+	gameOverText.setString("GAME OVER");
+	gameOverText.setCharacterSize(58);
+	gameOverText.setPosition({180.f, 170.f});
+
+	sf::Text playAgainText(font);
+	playAgainText.setString("Play Again");
+	playAgainText.setCharacterSize(34);
+	playAgainText.setPosition({285.f, 340.f});
+
+	sf::Text quitText(font);
+	quitText.setString("Quit");
+	quitText.setCharacterSize(34);
+	quitText.setPosition({350.f, 430.f});
+
+	// Heart Texture
 	sf::Texture heartTexture;
 	if (!heartTexture.loadFromFile(basePath + "sprites/Life_Heart.png"))
 	{
@@ -69,23 +118,21 @@ int main()
 	sf::Sprite heart2(heartTexture);
 	sf::Sprite heart3(heartTexture);
 
-	// Much smaller scale
 	float heartScale = 0.25f;
-
-	// Proper spacing
 	float startX = 4.f;
 	float startY = 4.f;
 	float spacing = 45.f;
 
-	heart1.setScale({ heartScale, heartScale });
-	heart2.setScale({ heartScale, heartScale });
-	heart3.setScale({ heartScale, heartScale });
+	heart1.setScale({heartScale, heartScale});
+	heart2.setScale({heartScale, heartScale});
+	heart3.setScale({heartScale, heartScale});
 
-	heart1.setPosition({ startX, startY });
-	heart2.setPosition({ startX + spacing, startY });
-	heart3.setPosition({ startX + spacing * 2.f, startY });
+	heart1.setPosition({startX, startY});
+	heart2.setPosition({startX + spacing, startY});
+	heart3.setPosition({startX + spacing * 2.f, startY});
 
 	Player player;
+	player.setPosition({400.f, 400.f});
 
 	// Clock
 	sf::Clock clock;
@@ -108,8 +155,7 @@ int main()
 	backgroundSprite.setScale({
 		static_cast<float>(windowSize.x) / textureSize.x,
 		static_cast<float>(windowSize.y) / textureSize.y
-		});
-
+	});
 
 	// Asteroids
 	std::vector<sf::Texture> asteroidTextures;
@@ -132,7 +178,7 @@ int main()
 	sf::Texture extraTexture;
 	if (!extraTexture.loadFromFile(basePath + "sprites/astroid67.png"))
 	{
-		std::cout << "Failed to load astroid67\n";
+		std::cout << "Failed to load " << basePath + "sprites/astroid67.png" << '\n';
 	}
 	else
 	{
@@ -141,30 +187,35 @@ int main()
 
 	std::vector<Asteroid> asteroids;
 
-	for (int i = 0; i < 6; i++)
+	auto spawnAsteroids = [&asteroids, &asteroidTextures]()
 	{
-		int textureIndex = std::rand() % asteroidTextures.size();
+		asteroids.clear();
 
-		float x = static_cast<float>(std::rand() % 800);
-		float y = static_cast<float>(std::rand() % 800);
+		for (int i = 0; i < 6; i++)
+		{
+			int textureIndex = std::rand() % asteroidTextures.size();
 
-		float vx = static_cast<float>((std::rand() % 201) - 100);
-		float vy = static_cast<float>((std::rand() % 201) - 100);
+			float x = static_cast<float>(std::rand() % 800);
+			float y = static_cast<float>(std::rand() % 800);
 
-		if (vx == 0.f && vy == 0.f)
-			vx = 50.f;
+			float vx = static_cast<float>((std::rand() % 201) - 100);
+			float vy = static_cast<float>((std::rand() % 201) - 100);
 
-		float rotationSpeed = static_cast<float>((std::rand() % 181) - 90);
+			if (vx == 0.f && vy == 0.f)
+				vx = 50.f;
 
-		asteroids.emplace_back(
-			asteroidTextures[textureIndex],
-			sf::Vector2f(x, y),
-			sf::Vector2f(vx, vy),
-			rotationSpeed
-		);
-	}
+			float rotationSpeed = static_cast<float>((std::rand() % 181) - 90);
 
-	//Bullets
+			asteroids.emplace_back(
+				asteroidTextures[textureIndex],
+				sf::Vector2f(x, y),
+				sf::Vector2f(vx, vy),
+				rotationSpeed
+			);
+		}
+	};
+
+	// Bullets
 	sf::Texture bulletTexture;
 	if (!bulletTexture.loadFromFile(basePath + "sprites/Bullet_Texture.png"))
 	{
@@ -174,6 +225,18 @@ int main()
 
 	std::vector<Bullet> bullets;
 
+	auto resetGame = [&]()
+	{
+		lives = 3;
+		score = 0;
+		invincibilityTimer = 0.f;
+
+		bullets.clear();
+		player.setPosition({400.f, 400.f});
+		spawnAsteroids();
+
+		currentState = GameState::Playing;
+	};
 
 	// Game loop
 	while (window.isOpen())
@@ -181,34 +244,70 @@ int main()
 		while (const std::optional event = window.pollEvent())
 		{
 			if (event->is<sf::Event::Closed>())
+			{
 				window.close();
+			}
+
+			if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>())
+			{
+				if (mousePressed->button == sf::Mouse::Button::Left)
+				{
+					sf::Vector2f mousePos = window.mapPixelToCoords(mousePressed->position);
+
+					if (currentState == GameState::MainMenu)
+					{
+						if (playText.getGlobalBounds().contains(mousePos))
+						{
+							resetGame();
+						}
+
+						if (quitMenuText.getGlobalBounds().contains(mousePos))
+						{
+							window.close();
+						}
+					}
+					else if (currentState == GameState::GameOver)
+					{
+						if (playAgainText.getGlobalBounds().contains(mousePos))
+						{
+							resetGame();
+						}
+
+						if (quitText.getGlobalBounds().contains(mousePos))
+						{
+							window.close();
+						}
+					}
+				}
+			}
 		}
 
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
 		float delta = clock.restart().asSeconds();
 
-		if (!gameOver)
+		if (currentState == GameState::Playing)
 		{
 			player.update(delta, mousePosition);
 
-			//Review how this works Eri
 			static bool wasMousePressed = false;
 			bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
-			if (isMousePressed && !wasMousePressed) {  // Only shoot on press, not hold
+			if (isMousePressed && !wasMousePressed)
+			{
 				shoot(player.getPosition(), player.getAngle(), bulletTexture, bullets);
 			}
 
 			wasMousePressed = isMousePressed;
 
-			for (auto& bullet : bullets) {
+			for (auto& bullet : bullets)
+			{
 				bullet.update(delta, window);
 			}
 
-
-
 			for (Asteroid& asteroid : asteroids)
+			{
 				asteroid.update(delta, window);
+			}
 
 			for (auto& bullet : bullets)
 			{
@@ -217,26 +316,29 @@ int main()
 					continue;
 				}
 
-				for (auto& asteroid : asteroids) {
+				for (auto& asteroid : asteroids)
+				{
 					if (!asteroid.isActive())
 					{
 						continue;
 					}
 
-					if (bullet.getBounds().findIntersection(asteroid.getBounds())) {
-						bullet.deactivate();     
-						asteroid.reset();   
-						score += 10;         
+					if (bullet.getBounds().findIntersection(asteroid.getBounds()))
+					{
+						bullet.deactivate();
+						asteroid.reset();
+						score += 10;
 						std::cout << "Score: " << score << '\n';
-
 						std::cout << "Asteroid destroyed!\n";
-						break;  // Bullet can only hit one asteroid
+						break;
 					}
 				}
 			}
 
 			if (invincibilityTimer > 0.f)
+			{
 				invincibilityTimer -= delta;
+			}
 
 			if (invincibilityTimer <= 0.f)
 			{
@@ -244,19 +346,6 @@ int main()
 				{
 					if (player.getBounds().findIntersection(asteroid.getBounds()))
 					{
-						std::cout << "Collision detected!\n";
-						std::cout << "Player: "
-							<< player.getBounds().position.x << ", "
-							<< player.getBounds().position.y << " | "
-							<< player.getBounds().size.x << " x "
-							<< player.getBounds().size.y << '\n';
-
-						std::cout << "Asteroid: "
-							<< asteroid.getBounds().position.x << ", "
-							<< asteroid.getBounds().position.y << " | "
-							<< asteroid.getBounds().size.x << " x "
-							<< asteroid.getBounds().size.y << '\n';
-
 						lives--;
 						invincibilityTimer = invincibilityDuration;
 
@@ -265,9 +354,8 @@ int main()
 						if (lives <= 0)
 						{
 							lives = 0;
-							gameOver = true;
+							currentState = GameState::GameOver;
 							std::cout << "Game Over\n";
-							std::cout << "Final Score: " << score << '\n';
 						}
 
 						break;
@@ -275,40 +363,60 @@ int main()
 				}
 			}
 
-
-			for (int i = bullets.size() - 1; i >= 0; i--) {
-				if (!bullets[i].isActive()) {
+			for (int i = static_cast<int>(bullets.size()) - 1; i >= 0; i--)
+			{
+				if (!bullets[i].isActive())
+				{
 					bullets.erase(bullets.begin() + i);
 				}
 			}
 
-			for (int i = asteroids.size() - 1; i >= 0; i--) {
-				if (!asteroids[i].isActive()) {
+			for (int i = static_cast<int>(asteroids.size()) - 1; i >= 0; i--)
+			{
+				if (!asteroids[i].isActive())
+				{
 					asteroids.erase(asteroids.begin() + i);
 				}
 			}
+		}
 
-			// DRAW
-			window.clear();
+		// Draw
+		window.clear();
+		window.draw(backgroundSprite);
 
-			window.draw(backgroundSprite);
-
+		if (currentState == GameState::MainMenu)
+		{
+			window.draw(titleText);
+			window.draw(playText);
+			window.draw(quitMenuText);
+		}
+		else if (currentState == GameState::Playing)
+		{
 			for (const Asteroid& asteroid : asteroids)
+			{
 				asteroid.draw(window);
+			}
 
-			for (const Bullet& bullet : bullets) {
+			for (const Bullet& bullet : bullets)
+			{
 				bullet.draw(window);
 			}
 
-				player.draw(window);
+			player.draw(window);
 
-				// Draw hearts
-				if (lives >= 1) window.draw(heart1);
-				if (lives >= 2) window.draw(heart2);
-				if (lives >= 3) window.draw(heart3);
-
-				window.display();
-			}
+			if (lives >= 1) window.draw(heart1);
+			if (lives >= 2) window.draw(heart2);
+			if (lives >= 3) window.draw(heart3);
 		}
-		return 0;
+		else if (currentState == GameState::GameOver)
+		{
+			window.draw(gameOverText);
+			window.draw(playAgainText);
+			window.draw(quitText);
+		}
+
+		window.display();
 	}
+
+	return 0;
+}

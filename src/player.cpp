@@ -88,6 +88,11 @@ void Player::draw(sf::RenderWindow& window)
     window.draw(sprite);
 }
 
+void Player::setPosition(sf::Vector2f position)
+{
+    sprite.setPosition(position);
+}
+
 sf::FloatRect Player::getBounds() const
 {
     sf::Vector2f pos = sprite.getPosition();
