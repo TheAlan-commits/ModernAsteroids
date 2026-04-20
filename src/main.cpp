@@ -80,7 +80,7 @@ int main()
 	titleText.setCharacterSize(52);
 	titleText.setPosition({110.f, 160.f});
 
-	sf::Text playText(font);w
+	sf::Text playText(font);
 	playText.setString("Play");
 	playText.setCharacterSize(34);
 	playText.setPosition({350.f, 340.f});
