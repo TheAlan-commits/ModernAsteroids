@@ -18,6 +18,7 @@ class Player
         void draw(sf::RenderWindow& window);
         sf::Angle getAngle() const;
         sf::Vector2f getPosition();
+        void setPosition(sf::Vector2f position);
 
     private:
         sf::Texture texture;
