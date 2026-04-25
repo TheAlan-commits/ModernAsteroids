@@ -90,6 +90,9 @@ int main()
 	quitMenuText.setCharacterSize(34);
 	quitMenuText.setPosition({355.f, 430.f});
 
+	sf::Text ScoreText(font);
+	ScoreText.setCharacterSize(34);
+
 	// Game Over UI
 	sf::Text gameOverText(font);
 	gameOverText.setString("GAME OVER");
@@ -402,7 +405,12 @@ int main()
 				bullet.draw(window);
 			}
 
+			ScoreText.setString("Score: " + std::to_string(score));
+			ScoreText.setCharacterSize(48);
+			ScoreText.setPosition({250.f, 0.f});
+			window.draw(ScoreText);
 			player.draw(window);
+
 
 			if (lives >= 1) window.draw(heart1);
 			if (lives >= 2) window.draw(heart2);
@@ -410,6 +418,11 @@ int main()
 		}
 		else if (currentState == GameState::GameOver)
 		{
+			
+			ScoreText.setString("Score: " + std::to_string(score));
+			ScoreText.setCharacterSize(58);
+			ScoreText.setPosition({ 225.f, 250.f });
+			window.draw(ScoreText);
 			window.draw(gameOverText);
 			window.draw(playAgainText);
 			window.draw(quitText);
