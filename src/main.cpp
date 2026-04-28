@@ -59,6 +59,27 @@ int main()
 		sf::State::Windowed
 	);
 
+	//Hide computer mouse
+	window.setMouseCursorVisible(false);
+
+	sf::Texture mouseTexture;
+	if (!mouseTexture.loadFromFile(basePath + "sprites/GameCursor.png"))
+	{
+		std::cout << "Failed to load custom cursor\n";
+	}
+
+	sf::Sprite mouseSprite(mouseTexture);
+	sf::Vector2u mouseSize = mouseTexture.getSize();
+
+	//sf::Vector2f mousePositionTEST = sf::Mouse::getPosition(window);
+
+	mouseSprite.setTexture(mouseTexture, true);
+	mouseSprite.setOrigin({ static_cast<float>(sf::Mouse::getPosition(window).x),
+static_cast<float>(sf::Mouse::getPosition(window).y) });
+	mouseSprite.setOrigin({ static_cast<float>(mouseSize.x) / 2.f,
+static_cast<float>(mouseSize.y) / 2.f });
+
+
 	GameState currentState = GameState::MainMenu;
 
 	//Shooter Sound Effect
@@ -317,7 +338,10 @@ int main()
 		}
 
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+
+		
 		float delta = clock.restart().asSeconds();
+
 
 		if (currentState == GameState::Playing)
 		{
@@ -475,6 +499,11 @@ int main()
 		window.clear();
 		window.draw(backgroundSprite);
 
+
+		mouseSprite.setPosition({ static_cast<float>(mousePosition.x),
+static_cast<float>(mousePosition.y) });
+		
+
 		if (currentState == GameState::MainMenu)
 		{
 			window.draw(titleText);
@@ -527,6 +556,7 @@ int main()
 			window.draw(quitText);
 		}
 
+		window.draw(mouseSprite);
 		window.display();
 	}
 
