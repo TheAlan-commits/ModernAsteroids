@@ -17,7 +17,7 @@ add_executable(ModernAsteroids ${SRC_FILES} "src/bullet.cpp")
 
 target_include_directories(ModernAsteroids PRIVATE include)
 target_compile_features(ModernAsteroids PRIVATE cxx_std_17)
-target_link_libraries(ModernAsteroids PRIVATE SFML::Graphics)
+target_link_libraries(ModernAsteroids PRIVATE SFML::Graphics SFML::Audio)
 
 add_custom_command(TARGET ModernAsteroids POST_BUILD 
     COMMAND ${CMAKE_COMMAND} -E copy_directory

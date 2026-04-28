@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "player.hpp"
 #include "asteroid.hpp"
 #include "bullet.hpp"
@@ -58,6 +59,15 @@ int main()
 	);
 
 	GameState currentState = GameState::MainMenu;
+
+	//Shooter Sound Effect
+	sf::SoundBuffer shootBuffer;
+	if(!shootBuffer.loadFromFile(basePath + "sounds/shootersound.wav"))
+	{
+		std::cout << "Failed to load shootersound.wav\n";
+	}
+
+	sf::Sound shootSound(shootBuffer);
 
 	// Player lives
 	int lives = 3;
@@ -297,6 +307,7 @@ int main()
 
 			if (isMousePressed && !wasMousePressed)
 			{
+				shootSound.play();
 				shoot(player.getPosition(), player.getAngle(), bulletTexture, bullets);
 			}
 
