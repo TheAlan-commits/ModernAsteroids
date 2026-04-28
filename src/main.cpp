@@ -38,6 +38,7 @@ int main()
 	};
 
 	int score = 0;
+	bool hasShield;
 
 	// Determine asset base path
 	std::string basePath = "assets/";
@@ -251,6 +252,13 @@ int main()
 
 	std::vector<Bullet> bullets;
 
+	//Shield
+
+	sf::CircleShape shield(player.getBounds().size.x + 10);
+	shield.setFillColor(sf::Color::Transparent);
+	shield.setOutlineColor(sf::Color::Cyan);
+	shield.setOutlineThickness(5.f);
+
 	auto resetGame = [&]()
 	{
 		lives = 3;
@@ -390,13 +398,41 @@ int main()
 					particles.erase(particles.begin() + i);
 				}
 			}
+
+			//uint8_t transparancy = 255;
+			//int UpORDown = 1; //Turn transparency up or down
 			if (invincibilityTimer > 0.f)
 			{
 				invincibilityTimer -= delta;
+				player.setTransparency(128);
+				hasShield = true;
+				//if (UpORDown)
+				//{
+				//	transparancy -= 50;
+				//}
+				//else
+				//{
+				//	transparancy += 50;
+				//}
+
+				//player.setTransparency(transparancy);
+
+				//if (transparancy <= 50)
+				//{
+				//	UpORDown = 0;
+				//}
+				//else if (transparancy >= 255)
+				//{
+				//	UpORDown = 1;
+				//}
+
+				
 			}
 
 			if (invincibilityTimer <= 0.f)
 			{
+				player.setTransparency(255);
+				hasShield = false;
 				for (Asteroid& asteroid : asteroids)
 				{
 					if (player.getBounds().findIntersection(asteroid.getBounds()))
@@ -472,6 +508,12 @@ int main()
 			if (lives >= 1) window.draw(heart1);
 			if (lives >= 2) window.draw(heart2);
 			if (lives >= 3) window.draw(heart3);
+
+			if (hasShield)
+			{
+				shield.setPosition({ player.getOrigin().x - 60 , player.getOrigin().y  - 60});
+				window.draw(shield);
+			}
 		}
 		else if (currentState == GameState::GameOver)
 		{

@@ -115,3 +115,13 @@ sf::Vector2f Player::getPosition()
 {
     return sprite.getPosition();
 }
+
+void Player::setTransparency(uint8_t transparency)
+{
+    sprite.setColor({ 255, 255, 255, transparency });
+}
+
+sf::Vector2f Player::getOrigin()
+{
+    return sprite.getGlobalBounds().getCenter();
+}
