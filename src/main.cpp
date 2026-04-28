@@ -228,6 +228,19 @@ int main()
 		}
 	};
 
+	//Particles
+	class Particle 
+	{
+	public:
+		sf::CircleShape shape;
+		sf::Vector2f speed;
+
+		float lifetime = 0.5f;
+
+	};
+
+	std::vector<Particle> particles;
+
 	// Bullets
 	sf::Texture bulletTexture;
 	if (!bulletTexture.loadFromFile(basePath + "sprites/Bullet_Texture.png"))
@@ -340,6 +353,21 @@ int main()
 					if (bullet.getBounds().findIntersection(asteroid.getBounds()))
 					{
 						bullet.deactivate();
+						
+						for (int i = 0; i < 35; i++)
+						{
+							Particle p;
+							p.shape.setRadius(2.f);
+							p.shape.setFillColor(sf::Color::Yellow);
+							p.shape.setPosition(asteroid.getPosition());
+
+							float angle = (rand() % 360) * 3.14159f / 180.f;
+							p.speed.x = cos(angle) * 100.f;
+							p.speed.y = sin(angle) * 100.f;
+
+							particles.push_back(p);
+
+						}
 						asteroid.reset();
 						score += 10;
 						std::cout << "Score: " << score << '\n';
@@ -349,6 +377,19 @@ int main()
 				}
 			}
 
+			for (auto& particle : particles)
+			{
+				particle.shape.move({ particle.speed.x * delta, particle.speed.y * delta });
+				particle.lifetime -= delta;
+			}
+			
+			for (int i = particles.size() - 1; i >= 0; i--)
+			{
+				if (particles[i].lifetime <= 0)
+				{
+					particles.erase(particles.begin() + i);
+				}
+			}
 			if (invincibilityTimer > 0.f)
 			{
 				invincibilityTimer -= delta;
@@ -414,6 +455,11 @@ int main()
 			for (const Bullet& bullet : bullets)
 			{
 				bullet.draw(window);
+			}
+
+			for (const Particle& particle : particles)
+			{
+				window.draw(particle.shape);
 			}
 
 			ScoreText.setString("Score: " + std::to_string(score));
