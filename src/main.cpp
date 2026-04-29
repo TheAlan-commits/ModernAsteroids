@@ -38,6 +38,7 @@ int main()
 	};
 
 	int score = 0;
+	bool hasShield;
 
 	// Determine asset base path
 	std::string basePath = "assets/";
@@ -57,6 +58,27 @@ int main()
 		sf::Style::Default,
 		sf::State::Windowed
 	);
+
+	//Hide computer mouse
+	window.setMouseCursorVisible(false);
+
+	sf::Texture mouseTexture;
+	if (!mouseTexture.loadFromFile(basePath + "sprites/GameCursor.png"))
+	{
+		std::cout << "Failed to load custom cursor\n";
+	}
+
+	sf::Sprite mouseSprite(mouseTexture);
+	sf::Vector2u mouseSize = mouseTexture.getSize();
+
+	//sf::Vector2f mousePositionTEST = sf::Mouse::getPosition(window);
+
+	mouseSprite.setTexture(mouseTexture, true);
+	mouseSprite.setOrigin({ static_cast<float>(sf::Mouse::getPosition(window).x),
+static_cast<float>(sf::Mouse::getPosition(window).y) });
+	mouseSprite.setOrigin({ static_cast<float>(mouseSize.x) / 2.f,
+static_cast<float>(mouseSize.y) / 2.f });
+
 
 	GameState currentState = GameState::MainMenu;
 
@@ -228,6 +250,19 @@ int main()
 		}
 	};
 
+	//Particles
+	class Particle 
+	{
+	public:
+		sf::CircleShape shape;
+		sf::Vector2f speed;
+
+		float lifetime = 0.5f;
+
+	};
+
+	std::vector<Particle> particles;
+
 	// Bullets
 	sf::Texture bulletTexture;
 	if (!bulletTexture.loadFromFile(basePath + "sprites/Bullet_Texture.png"))
@@ -237,6 +272,13 @@ int main()
 	}
 
 	std::vector<Bullet> bullets;
+
+	//Shield
+
+	sf::CircleShape shield(player.getBounds().size.x + 10);
+	shield.setFillColor(sf::Color::Transparent);
+	shield.setOutlineColor(sf::Color::Cyan);
+	shield.setOutlineThickness(5.f);
 
 	auto resetGame = [&]()
 	{
@@ -296,7 +338,10 @@ int main()
 		}
 
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+
+		
 		float delta = clock.restart().asSeconds();
+
 
 		if (currentState == GameState::Playing)
 		{
@@ -340,6 +385,21 @@ int main()
 					if (bullet.getBounds().findIntersection(asteroid.getBounds()))
 					{
 						bullet.deactivate();
+						
+						for (int i = 0; i < 35; i++)
+						{
+							Particle p;
+							p.shape.setRadius(2.f);
+							p.shape.setFillColor(sf::Color::Yellow);
+							p.shape.setPosition(asteroid.getPosition());
+
+							float angle = (rand() % 360) * 3.14159f / 180.f;
+							p.speed.x = cos(angle) * 100.f;
+							p.speed.y = sin(angle) * 100.f;
+
+							particles.push_back(p);
+
+						}
 						asteroid.reset();
 						score += 10;
 						std::cout << "Score: " << score << '\n';
@@ -349,13 +409,54 @@ int main()
 				}
 			}
 
+			for (auto& particle : particles)
+			{
+				particle.shape.move({ particle.speed.x * delta, particle.speed.y * delta });
+				particle.lifetime -= delta;
+			}
+			
+			for (int i = particles.size() - 1; i >= 0; i--)
+			{
+				if (particles[i].lifetime <= 0)
+				{
+					particles.erase(particles.begin() + i);
+				}
+			}
+
+			//uint8_t transparancy = 255;
+			//int UpORDown = 1; //Turn transparency up or down
 			if (invincibilityTimer > 0.f)
 			{
 				invincibilityTimer -= delta;
+				player.setTransparency(128);
+				hasShield = true;
+				//if (UpORDown)
+				//{
+				//	transparancy -= 50;
+				//}
+				//else
+				//{
+				//	transparancy += 50;
+				//}
+
+				//player.setTransparency(transparancy);
+
+				//if (transparancy <= 50)
+				//{
+				//	UpORDown = 0;
+				//}
+				//else if (transparancy >= 255)
+				//{
+				//	UpORDown = 1;
+				//}
+
+				
 			}
 
 			if (invincibilityTimer <= 0.f)
 			{
+				player.setTransparency(255);
+				hasShield = false;
 				for (Asteroid& asteroid : asteroids)
 				{
 					if (player.getBounds().findIntersection(asteroid.getBounds()))
@@ -398,6 +499,11 @@ int main()
 		window.clear();
 		window.draw(backgroundSprite);
 
+
+		mouseSprite.setPosition({ static_cast<float>(mousePosition.x),
+static_cast<float>(mousePosition.y) });
+		
+
 		if (currentState == GameState::MainMenu)
 		{
 			window.draw(titleText);
@@ -416,6 +522,11 @@ int main()
 				bullet.draw(window);
 			}
 
+			for (const Particle& particle : particles)
+			{
+				window.draw(particle.shape);
+			}
+
 			ScoreText.setString("Score: " + std::to_string(score));
 			ScoreText.setCharacterSize(48);
 			ScoreText.setPosition({250.f, 0.f});
@@ -426,6 +537,12 @@ int main()
 			if (lives >= 1) window.draw(heart1);
 			if (lives >= 2) window.draw(heart2);
 			if (lives >= 3) window.draw(heart3);
+
+			if (hasShield)
+			{
+				shield.setPosition({ player.getOrigin().x - 60 , player.getOrigin().y  - 60});
+				window.draw(shield);
+			}
 		}
 		else if (currentState == GameState::GameOver)
 		{
@@ -439,6 +556,7 @@ int main()
 			window.draw(quitText);
 		}
 
+		window.draw(mouseSprite);
 		window.display();
 	}
 

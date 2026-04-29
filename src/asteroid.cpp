@@ -67,7 +67,31 @@ sf::Vector2f Asteroid::getPosition() const
 
 void Asteroid::reset()
 {
-    sprite.setPosition({ static_cast<float>(std::rand() % 800), static_cast<float>(std::rand() % 800) });
+    //sprite.setPosition({ static_cast<float>(std::rand() % 800), static_cast<float>(std::rand() % 800) });
+
+    int respawnPoint = static_cast<float>(std::rand() % 4);
+    /*
+    0 - Up
+    1 - Down
+    2 - Left
+    3 - Right
+    */
+    if (respawnPoint == 0)
+    {
+        sprite.setPosition({ static_cast<float>(std::rand() % 800), static_cast<float>(std::rand() % 25) });
+    }
+    else if (respawnPoint == 1)
+    {
+        sprite.setPosition({ static_cast<float>(std::rand() % 800), static_cast<float>(std::rand() % 25) + 775.f });
+    }
+    else if (respawnPoint == 2)
+    {
+        sprite.setPosition({ static_cast<float>(std::rand() % 25), static_cast<float>(std::rand() % 800) });
+    }
+    else
+    {
+        sprite.setPosition({ static_cast<float>(std::rand() % 25) + 775.f, static_cast<float>(std::rand() % 800) });
+    }
     //int x_or_y = std::rand() % 2;
     //int b_or_f = std::rand() % 2;
 
