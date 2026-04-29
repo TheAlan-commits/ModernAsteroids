@@ -20,7 +20,7 @@ class Player
         sf::Vector2f getPosition();
         void setPosition(sf::Vector2f position);
         void setTransparency(uint8_t transparency);
-        sf::Vector2f Player::getOrigin();
+        sf::Vector2f getOrigin();
 
     private:
         sf::Texture texture;
