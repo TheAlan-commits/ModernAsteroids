@@ -12,6 +12,7 @@
 #include <ctime>
 #include <filesystem>
 
+// im just adding this comment, so I can create another pr
 void shoot(sf::Vector2f playerPosition, sf::Angle playerRotation, sf::Texture& bulletTexture, std::vector<Bullet>& bullets)
 {
 	// Convert angle to direction
