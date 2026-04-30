@@ -12,6 +12,7 @@
 #include <ctime>
 #include <filesystem>
 
+// im just adding this comment, so I can create another pr
 void shoot(sf::Vector2f playerPosition, sf::Angle playerRotation, sf::Texture& bulletTexture, std::vector<Bullet>& bullets)
 {
 	// Convert angle to direction
@@ -90,6 +91,28 @@ static_cast<float>(mouseSize.y) / 2.f });
 	}
 
 	sf::Sound shootSound(shootBuffer);
+	shootSound.setVolume(50.f);
+
+	// Background Music
+	sf::Music backgroundMusic;
+	if (!backgroundMusic.openFromFile(basePath + "sounds/New_Project.wav"))
+	{
+		std::cout << "Failed to load background music\n";
+	}
+	else
+	{
+		backgroundMusic.setLooping(true);
+		backgroundMusic.setVolume(50.f);
+	}
+
+	// Death Sound Effect
+	sf::SoundBuffer deathBuffer;
+	if(!deathBuffer.loadFromFile(basePath + "sounds/yikesyoulost.wav"))
+	{
+		std::cout << "Failed to load yikesyoulost.wav\n";
+	}
+	sf::Sound deathSound(deathBuffer);
+	deathSound.setVolume(150.f);
 
 	// Player lives
 	int lives = 3;
@@ -303,6 +326,22 @@ static_cast<float>(mouseSize.y) / 2.f });
 				window.close();
 			}
 
+			// Music control based on game state
+			if (currentState == GameState::Playing)
+			{
+				if (backgroundMusic.getStatus() != sf::SoundSource::Status::Playing)
+				{
+					backgroundMusic.play();
+				}
+			}
+			else if (currentState == GameState::MainMenu || currentState == GameState::GameOver)
+			{
+				if (backgroundMusic.getStatus() == sf::SoundSource::Status::Playing)
+				{
+					backgroundMusic.pause();
+				}
+			}
+
 			if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>())
 			{
 				if (mousePressed->button == sf::Mouse::Button::Left)
@@ -429,28 +468,7 @@ static_cast<float>(mouseSize.y) / 2.f });
 			{
 				invincibilityTimer -= delta;
 				player.setTransparency(128);
-				hasShield = true;
-				//if (UpORDown)
-				//{
-				//	transparancy -= 50;
-				//}
-				//else
-				//{
-				//	transparancy += 50;
-				//}
-
-				//player.setTransparency(transparancy);
-
-				//if (transparancy <= 50)
-				//{
-				//	UpORDown = 0;
-				//}
-				//else if (transparancy >= 255)
-				//{
-				//	UpORDown = 1;
-				//}
-
-				
+				hasShield = true;	
 			}
 
 			if (invincibilityTimer <= 0.f)
@@ -469,6 +487,7 @@ static_cast<float>(mouseSize.y) / 2.f });
 						if (lives <= 0)
 						{
 							lives = 0;
+							deathSound.play();
 							currentState = GameState::GameOver;
 							std::cout << "Game Over\n";
 						}
